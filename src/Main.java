@@ -1,13 +1,25 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-void main() {
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    IO.println(String.format("Hello and welcome!"));
+import campus.FileReservationRepository;
+import campus.ReservationService;
+import campus.ReservationWindow;
+import campus.Space;
+import javax.swing.*;
+import java.nio.file.Path;
+import java.time.Clock;
 
-    for (int i = 1; i <= 5; i++) {
-        //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-        // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        IO.println("i = " + i);
+/** Desktop application entry point. */
+public class Main {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                Path path = args.length == 0 ? Path.of("data", "reservations.properties") : Path.of(args[0]);
+                ReservationService service = new ReservationService(Space.samples(),
+                        new FileReservationRepository(path), Clock.systemDefaultZone());
+                new ReservationWindow(service, path.toAbsolutePath()).setVisible(true);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Could not open application: " + e.getMessage()
+                    + "\nExisting data has not been overwritten.", "Startup error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 }
