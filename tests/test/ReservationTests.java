@@ -5,6 +5,7 @@ import model.Reservation;
 import model.Space;
 import persistence.FileReservationRepository;
 import persistence.ReservationRepository;
+import model.ScheduleBlock;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,6 +45,60 @@ public final class ReservationTests {
         check(s.spaces(1000).isEmpty() && s.spaces(0).size() == 4, "US-3 empty and clear");
         check(new ReservationService(List.of(), new MemoryRepository(), CLOCK).spaces(0).isEmpty(), "US-1 empty catalog");
         check(s.forDay("library-101", DAY).isEmpty(), "US-4 fully available");
+        MemoryRepository scheduleRepository = new MemoryRepository();
+        ReservationService scheduleService = new ReservationService(Space.samples(),scheduleRepository, CLOCK);
+        List<ScheduleBlock> emptySchedule = scheduleService.scheduleForDay("library-101", DAY);
+
+        check(
+                emptySchedule.size() == 1
+                        && !emptySchedule.get(0).reserved()
+                        && emptySchedule.get(0).start().equals(DAY.atStartOfDay())
+                        && emptySchedule.get(0).end().equals(DAY.plusDays(1).atStartOfDay()),
+                "US-5 fully available schedule block"
+        );
+        create(scheduleService, "alice", "library-101", DAY, "10:00", "11:00");
+
+        List<ScheduleBlock> oneReservationSchedule = scheduleService.scheduleForDay("library-101", DAY);
+
+        check(
+                oneReservationSchedule.size() == 3,
+                "US-5 schedule splits around reservation"
+        );
+
+        check(
+                !oneReservationSchedule.get(0).reserved()
+                        && oneReservationSchedule.get(0).start().equals(DAY.atStartOfDay())
+                        && oneReservationSchedule.get(0).end().equals(DAY.atTime(10, 0)),
+                "US-5 available block before reservation"
+        );
+
+        check(
+                oneReservationSchedule.get(1).reserved()
+                        && oneReservationSchedule.get(1).start().equals(DAY.atTime(10, 0))
+                        && oneReservationSchedule.get(1).end().equals(DAY.atTime(11, 0))
+                        && oneReservationSchedule.get(1).purpose().equals("Study"),
+                "US-5 reserved schedule block"
+        );
+
+        check(
+                !oneReservationSchedule.get(2).reserved()
+                        && oneReservationSchedule.get(2).start().equals(DAY.atTime(11, 0))
+                        && oneReservationSchedule.get(2).end().equals(DAY.plusDays(1).atStartOfDay()),
+                "US-5 available block after reservation"
+        );
+        create(scheduleService, "alice", "library-101", DAY, "11:00", "12:00");
+
+        List<ScheduleBlock> backToBackSchedule =
+                scheduleService.scheduleForDay("library-101", DAY);
+
+        check(
+                backToBackSchedule.size() == 4
+                        && backToBackSchedule.get(1).reserved()
+                        && backToBackSchedule.get(2).reserved()
+                        && backToBackSchedule.get(1).end()
+                        .equals(backToBackSchedule.get(2).start()),
+                "US-5 back-to-back reservations have no available gap"
+        );
         Reservation first = create(s, "alice", "library-101", DAY, "10:00", "11:00");
         reject(() -> create(s, "bob", "library-101", DAY, "10:30", "11:30"), "US-6 overlap");
         reject(() -> create(s, "bob", "library-101", DAY, "09:00", "12:00"), "US-6 enclosing overlap");
