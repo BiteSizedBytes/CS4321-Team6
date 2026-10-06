@@ -1,4 +1,6 @@
-package campus;
+package persistence;
+import model.Reservation;
+
 import java.io.IOException;
 import java.util.List;
 public interface ReservationRepository {

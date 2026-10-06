@@ -7,5 +7,5 @@ New-Item -ItemType Directory -Force out/tests | Out-Null
 $sources = @(Get-ChildItem src,tests -Recurse -Filter '*.java' | ForEach-Object FullName)
 & $compiler --release 17 -encoding UTF-8 -d out/tests @sources
 if ($LASTEXITCODE -ne 0) { throw 'Compilation failed.' }
-& $runtime '-Djava.awt.headless=true' -cp out/tests campus.ReservationTests
+& $runtime '-Djava.awt.headless=true' -cp out/tests test.ReservationTests
 if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }

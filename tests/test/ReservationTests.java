@@ -1,9 +1,16 @@
-package campus;
+package test;
+
+import controller.ReservationService;
+import model.Reservation;
+import model.Space;
+import persistence.FileReservationRepository;
+import persistence.ReservationRepository;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.*;
-import java.util.*;
+import java.util.List;
 
 /** Dependency-free acceptance tests. Run with scripts/test.ps1. */
 public final class ReservationTests {
@@ -23,6 +30,14 @@ public final class ReservationTests {
         MemoryRepository repository = new MemoryRepository();
         ReservationService s = new ReservationService(Space.samples(), repository, CLOCK);
         check(s.spaces(0).size() == 4, "US-1 list spaces");
+        check(
+                s.spaces(0).stream().allMatch(space ->
+                        !space.name().isBlank()
+                        && !space.building().isBlank()
+                        && space.capacity() > 0
+        ),
+        "US-1 spaces include name,building, and capacity"
+        );
         check(s.space("library-101").features().contains("Whiteboard"), "US-2 details");
         check(s.space("unknown") == null, "US-2 missing space");
         check(s.spaces(12).size() == 3 && s.spaces(12).stream().allMatch(v -> v.capacity() >= 12), "US-3 inclusive filter");
