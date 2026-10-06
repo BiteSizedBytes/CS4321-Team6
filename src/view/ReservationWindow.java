@@ -1,4 +1,8 @@
-package campus;
+package view;
+
+import controller.ReservationService;
+import model.Reservation;
+import model.Space;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

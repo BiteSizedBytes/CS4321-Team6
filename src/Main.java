@@ -1,7 +1,7 @@
-import campus.FileReservationRepository;
-import campus.ReservationService;
-import campus.ReservationWindow;
-import campus.Space;
+import persistence.FileReservationRepository;
+import controller.ReservationService;
+import view.ReservationWindow;
+import model.Space;
 import javax.swing.*;
 import java.nio.file.Path;
 import java.time.Clock;

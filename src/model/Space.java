@@ -1,4 +1,4 @@
-package campus;
+package model;
 import java.util.List;
 
 public record Space(String id, String name, String building, int capacity, List<String> features) {
