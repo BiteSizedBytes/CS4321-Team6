@@ -133,7 +133,17 @@ public final class ReservationWindow extends JFrame {
         spaces.clearSelection(); spaceModel.setRowCount(0);
         visibleSpaces = service.spaces((Integer) capacity.getValue());
         for (Space s : visibleSpaces) spaceModel.addRow(new Object[]{s.name(), s.building(), s.capacity()});
-        spaceMessage.setText(visibleSpaces.isEmpty() ? "No spaces match this capacity. Clear the filter to see all spaces." : visibleSpaces.size() + " spaces found.");
+        if (visibleSpaces.isEmpty()) {
+            if ((Integer) capacity.getValue() == 0) {
+                spaceMessage.setText("No reservable campus spaces are currently available. ");
+            } else {
+                spaceMessage.setText("no spaces match this capacity. Clear the filter to see all spaces.");
+            }
+        } else {
+            spaceMessage.setText(visibleSpaces.size() + "spaces found.");
+
+        }
+
         int selection = previous == null ? -1 : visibleSpaces.indexOf(previous);
         if (selection >= 0) spaces.setRowSelectionInterval(selection, selection);
         refreshDay();
