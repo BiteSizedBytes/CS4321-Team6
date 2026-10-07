@@ -96,6 +96,7 @@ Tests use temporary storage and do not modify the application's normal reservati
 ## Manual Acceptance Checks
 
 | **User stories** | **Verification** |
+| --- | --- |
 | US-1–US-3 | Launch the application and verify space names, buildings, capacities, and features. Set the minimum capacity to 12, then 1000, and finally clear the filter. |
 | US-4–US-5 | Select a space and a future date. Create a 10:00–11:00 reservation. Verify schedule labels, colors, chronological ordering, and the calendar marker. Select an unbooked date and verify full availability. |
 | US-6 | Attempt a conflicting 10:30–11:30 reservation and verify rejection. Create an adjacent 11:00–12:00 reservation and verify acceptance. Test missing purposes, reversed times, and past dates. |
