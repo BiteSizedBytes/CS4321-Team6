@@ -1,4 +1,6 @@
-package campus;
+package persistence;
+import model.Reservation;
+
 import java.io.*;
 import java.nio.file.*;
 import java.time.*;

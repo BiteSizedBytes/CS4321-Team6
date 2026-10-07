@@ -1,4 +1,9 @@
-package campus;
+package view;
+
+import controller.ReservationService;
+import model.Reservation;
+import model.Space;
+import model.ScheduleBlock;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -150,14 +155,29 @@ public final class ReservationWindow extends JFrame {
         } else {
             details.setText("<html>" + html(s.building()) + " · Capacity: " + s.capacity() + "<br>Features: " + html(String.join(", ", s.features())) + "</html>");
             List<Reservation> reservations = service.forDay(s.id(), selectedDate);
-            LocalTime cursor = LocalTime.MIDNIGHT;
-            for (Reservation r : reservations) {
-                if (r.start().isAfter(cursor)) scheduleModel.addRow(new Object[]{TIME.format(cursor), TIME.format(r.start()), "Available", ""});
-                scheduleModel.addRow(new Object[]{TIME.format(r.start()), TIME.format(r.end()), "Reserved", r.purpose()});
-                cursor = r.end();
+            List<ScheduleBlock> blocks =
+                    service.scheduleForDay(s.id(), selectedDate);
+            for (ScheduleBlock block : blocks) {
+                String startText =
+                        TIME.format(block.start().toLocalTime());
+                String endText =
+                        block.end().toLocalDate().isAfter(selectedDate)
+                        ? "24:00"
+                                :TIME.format(block.end().toLocalTime());
+                scheduleModel.addRow(new Object[]{
+                        startText,
+                        endText,
+                        block.reserved() ? "Reserved" : "Availabe",
+                        block.purpose()
+                });
             }
-            scheduleModel.addRow(new Object[]{TIME.format(cursor), "24:00", "Available", ""});
-            scheduleMessage.setText(selectedDate + " · " + (reservations.isEmpty() ? "Fully available" : reservations.size() + " reservation(s)"));
+            scheduleMessage.setText(
+                    selectedDate + " . " +
+                            (reservations.isEmpty()
+                            ? "Fully available"
+                            : reservations.size() + " reservation(s)")
+            );
+
         }
         refreshCalendar();
     }

@@ -1,4 +1,9 @@
-package campus;
+package controller;
+import persistence.ReservationRepository;
+import model.Reservation;
+import model.Space;
+import model.ScheduleBlock;
+
 import java.io.IOException;
 import java.time.*;
 import java.util.*;
@@ -28,6 +33,44 @@ public final class ReservationService {
     public List<Reservation> forDay(String spaceId, LocalDate date) {
         return reservations.stream().filter(r -> r.spaceId().equals(spaceId) && r.date().equals(date)).sorted(ORDER).toList();
     }
+    public List<ScheduleBlock> scheduleForDay(String spaceId, LocalDate date) {
+        List<Reservation> dailyReservations = forDay(spaceId, date);
+        List<ScheduleBlock> blocks = new ArrayList<>();
+
+        LocalDateTime cursor = date.atStartOfDay();
+        LocalDateTime dayEnd = date.plusDays(1).atStartOfDay();
+
+        for (Reservation reservation : dailyReservations) {
+            LocalDateTime reservationStart = date.atTime(reservation.start());
+            LocalDateTime reservationEnd = date.atTime(reservation.end());
+
+            if (reservationStart.isAfter(cursor)) {
+                blocks.add(new ScheduleBlock(
+                        cursor,
+                        reservationStart,
+                        false,
+                        ""
+                ));
+            }
+            blocks.add(new ScheduleBlock(
+                    reservationStart,
+                    reservationEnd,
+                    true,
+                    reservation.purpose()
+            ));
+            cursor = reservationEnd;
+        }
+        if (cursor.isBefore(dayEnd)){
+            blocks.add(new ScheduleBlock(
+                    cursor,
+                    dayEnd,
+                    false,
+                    ""
+            ));
+        }
+        return List.copyOf(blocks);
+    }
+
     public List<Reservation> forStudent(String student) {
         String owner = student == null ? "" : student.strip();
         return reservations.stream().filter(r -> r.student().equals(owner)).sorted(ORDER).toList();
